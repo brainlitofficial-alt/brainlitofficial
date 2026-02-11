@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -13,23 +12,15 @@ import {
 import { supabase, Registration } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet";
-import { LogOut, RefreshCw } from "lucide-react";
+import { Home, RefreshCw } from "lucide-react";
 
 const AdminDashboard = () => {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    // Check authentication
-    const isLoggedIn = sessionStorage.getItem("admin_authenticated");
-    if (isLoggedIn !== "true") {
-      navigate("/admin/login");
-      return;
-    }
-
     fetchRegistrations();
-  }, [navigate]);
+  }, []);
 
   const fetchRegistrations = async () => {
     setIsLoading(true);
@@ -64,9 +55,7 @@ const AdminDashboard = () => {
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem("admin_authenticated");
-    toast.success("Logged out successfully");
-    navigate("/admin/login");
+    window.location.href = "/";
   };
 
   const formatDate = (dateString: string) => {
@@ -137,9 +126,9 @@ const AdminDashboard = () => {
                 <Button variant="outline" size="sm" onClick={exportToCSV}>
                   Export CSV
                 </Button>
-                <Button variant="destructive" size="sm" onClick={handleLogout}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Logout
+                <Button variant="outline" size="sm" onClick={handleLogout}>
+                  <Home className="h-4 w-4 mr-2" />
+                  Home
                 </Button>
               </div>
             </div>
