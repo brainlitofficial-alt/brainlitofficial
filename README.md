@@ -1,22 +1,21 @@
-# Welcome to your Lovable project
+# BrainLIT - Smart Learning Platform
 
-## Project info
+**Developed by Sirah Digital**
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+A modern webinar registration platform for BrainLIT bootcamp programs.
 
-## How can I edit this code?
+## Project Overview
 
-There are several ways of editing your application.
+BrainLIT is a comprehensive learning platform that helps parents register for educational webinars. The platform includes:
+- User registration system with form validation
+- Admin dashboard for managing registrations
+- Webinar date management
+- Automated webhook integration for n8n workflows
+- Secure admin authentication
 
-**Use Lovable**
+## How to edit this code
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+You can work on this project locally using your preferred IDE.
 
 The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
@@ -62,12 +61,31 @@ This project is built with:
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+This project is configured for deployment on Vercel. See [VERCEL-DEPLOYMENT.md](VERCEL-DEPLOYMENT.md) for complete deployment instructions.
 
-## Can I connect a custom domain to my Lovable project?
+### Quick Deploy Steps:
 
-Yes, you can!
+1. Push your code to GitHub
+2. Connect your GitHub repository to Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy!
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+For detailed instructions including database setup and environment configuration, refer to the [VERCEL-DEPLOYMENT.md](VERCEL-DEPLOYMENT.md) file.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Features
+
+- **Registration Form**: Validates user input with duplicate detection
+- **Admin Dashboard**: Secure login with session management
+- **Webinar Management**: Set and display upcoming webinar dates
+- **Data Export**: Export registrations to CSV
+- **Webhook Integration**: Automatic notifications via n8n
+- **Database**: Supabase integration with Row Level Security
+
+## Environment Variables
+
+See `.env.example` for required environment variables. Never commit your `.env` file to version control.
+
+## Credits
+
+**Developed by Sirah Digital**  
+Specialized in AI automation and web development solutions.
