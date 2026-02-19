@@ -9,17 +9,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { supabase, Registration } from "@/lib/supabase";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { supabase, Registration, WebinarSettings } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet";
-import { Home, RefreshCw } from "lucide-react";
+import { Home, RefreshCw, Calendar } from "lucide-react";
 
 const AdminDashboard = () => {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [webinarDate, setWebinarDate] = useState<string>("");
+  const [isSavingDate, setIsSavingDate] = useState(false);
 
   useEffect(() => {
     fetchRegistrations();
+    fetchWebinarSettings();
   }, []);
 
   const fetchRegistrations = async () => {
@@ -51,6 +56,79 @@ const AdminDashboard = () => {
       toast.error(`Failed to fetch registrations: ${error.message || 'Unknown error'}`);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchWebinarSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("webinar_settings")
+        .select("*")
+        .limit(1)
+        .single();
+
+      if (error) {
+        console.error("Error fetching webinar settings:", error);
+        return;
+      }
+
+      if (data?.next_webinar_date) {
+        // Convert to datetime-local format (YYYY-MM-DDTHH:MM)
+        const date = new Date(data.next_webinar_date);
+        const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+        setWebinarDate(localDate.toISOString().slice(0, 16));
+      }
+    } catch (error: any) {
+      console.error("Error fetching webinar settings:", error);
+    }
+  };
+
+  const saveWebinarDate = async () => {
+    if (!webinarDate) {
+      toast.error("Please select a date and time");
+      return;
+    }
+
+    setIsSavingDate(true);
+    try {
+      // Check if a settings row exists
+      const { data: existing } = await supabase
+        .from("webinar_settings")
+        .select("*")
+        .limit(1)
+        .single();
+
+      const dateToSave = new Date(webinarDate).toISOString();
+
+      if (existing) {
+        // Update existing
+        const { error } = await supabase
+          .from("webinar_settings")
+          .update({ 
+            next_webinar_date: dateToSave,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", existing.id);
+
+        if (error) throw error;
+      } else {
+        // Insert new
+        const { error } = await supabase
+          .from("webinar_settings")
+          .insert({ 
+            next_webinar_date: dateToSave,
+            updated_at: new Date().toISOString()
+          });
+
+        if (error) throw error;
+      }
+
+      toast.success("Webinar date updated successfully!");
+    } catch (error: any) {
+      console.error("Error saving webinar date:", error);
+      toast.error(`Failed to save webinar date: ${error.message}`);
+    } finally {
+      setIsSavingDate(false);
     }
   };
 
@@ -104,6 +182,51 @@ const AdminDashboard = () => {
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 md:p-8">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Webinar Settings Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-xl font-bold flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Webinar Settings
+              </CardTitle>
+              <CardDescription>Set the next webinar date and time</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col md:flex-row gap-4 items-end">
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor="webinarDate">Next Webinar Date & Time</Label>
+                  <Input
+                    id="webinarDate"
+                    type="datetime-local"
+                    value={webinarDate}
+                    onChange={(e) => setWebinarDate(e.target.value)}
+                    className="h-12"
+                  />
+                </div>
+                <Button 
+                  onClick={saveWebinarDate} 
+                  disabled={isSavingDate}
+                  className="h-12"
+                >
+                  {isSavingDate ? "Saving..." : "Save Webinar Date"}
+                </Button>
+              </div>
+              {webinarDate && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  Current: {new Date(webinarDate).toLocaleString("en-IN", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Registrations Card */}
         <Card className="max-w-7xl mx-auto">
           <CardHeader>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -176,6 +299,7 @@ const AdminDashboard = () => {
             )}
           </CardContent>
         </Card>
+        </div>
       </div>
     </>
   );

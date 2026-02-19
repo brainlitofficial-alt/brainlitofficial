@@ -19,3 +19,9 @@ export interface Registration {
   registered_at: string;
   created_at?: string;
 }
+
+export interface WebinarSettings {
+  id?: number;
+  next_webinar_date: string;
+  updated_at?: string;
+}

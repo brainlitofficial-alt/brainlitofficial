@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +27,32 @@ export function RegistrationForm() {
   });
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [webinarDate, setWebinarDate] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchWebinarDate();
+  }, []);
+
+  const fetchWebinarDate = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("webinar_settings")
+        .select("next_webinar_date")
+        .limit(1)
+        .single();
+
+      if (error) {
+        console.error("Error fetching webinar date:", error);
+        return;
+      }
+
+      if (data?.next_webinar_date) {
+        setWebinarDate(data.next_webinar_date);
+      }
+    } catch (error) {
+      console.error("Error fetching webinar date:", error);
+    }
+  };
 
   const handleChange = (field: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
@@ -120,6 +146,7 @@ export function RegistrationForm() {
             email: result.data.email,
             location: result.data.location,
             registeredAt: new Date().toISOString(),
+            webinarDate: webinarDate,
           }),
         });
       } catch (webhookError) {
@@ -157,6 +184,22 @@ export function RegistrationForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      {webinarDate && (
+        <div className="bg-secondary/10 border border-secondary/20 rounded-lg p-4 mb-4">
+          <p className="text-sm font-medium text-foreground mb-1">Webinar Date & Time:</p>
+          <p className="text-lg font-bold text-secondary">
+            {new Date(webinarDate).toLocaleString("en-IN", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </p>
+        </div>
+      )}
+
       <div className="space-y-2">
         <Label htmlFor="parentName" className="text-foreground font-medium">
           Parent's Name
