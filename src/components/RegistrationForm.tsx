@@ -6,6 +6,13 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/lib/supabase";
 
+// Facebook Pixel type declaration
+declare global {
+  interface Window {
+    fbq?: (action: string, event: string, params?: object) => void;
+  }
+}
+
 const formSchema = z.object({
   parentName: z.string().trim().min(2, "Please enter your parent's name").max(50, "Name is too long"),
   whatsapp: z
@@ -158,6 +165,14 @@ export function RegistrationForm() {
       const existing = JSON.parse(localStorage.getItem("webinar_registrations") || "[]");
       existing.push({ ...result.data, registeredAt: new Date().toISOString() });
       localStorage.setItem("webinar_registrations", JSON.stringify(existing));
+
+      // Track Facebook Pixel CompleteRegistration event
+      if (window.fbq) {
+        window.fbq('track', 'CompleteRegistration', {
+          content_name: 'BrainLit AI Bootcamp Registration',
+          status: 'completed'
+        });
+      }
 
       toast.success("Registration Successful!", {
         description: "You will receive webinar details on WhatsApp shortly.",
